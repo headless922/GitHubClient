@@ -86,39 +86,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 }
                 if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                     // End has been reached
-
-                    Log.i("page", "end reached");
-
                     App.getApi().getUserListSince(mUsers.get(totalItemCount-1).getUserId()).enqueue(new Callback<List<UserRequestModel>>() {
                         @Override
                         public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
                             mUsers.addAll(response.body());
                             mRecyclerView.getAdapter().notifyDataSetChanged();
                         }
-
                         @Override
                         public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
                             Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
                         }
                     });
-
                     loading = true;
                 }
             }
         });
 
-        App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
-            @Override
-            public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
-                mUsers.addAll(response.body());
-                mRecyclerView.getAdapter().notifyDataSetChanged();
-            }
-
-            @Override
-            public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
-            }
-        });
+        requestUserList();
 
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(
@@ -135,10 +119,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         }));
     }
 
+    private void requestUserList() {
+        App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
+            @Override
+            public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
+                mUsers.addAll(response.body());
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onRefresh() {
-        /*int lastId;
-        lastId = mUsers.get(mUsers.size()-1).getUserId();*/
         App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
             @Override
             public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
@@ -176,25 +173,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 public void onClick(DialogInterface dialog, int whichButton) {
                     String login = editText.getText().toString();
                     if (!"".equals(login)) {
-                        App.getApi().searchUserByLogin(login).enqueue(new Callback<SearchRequestModel>() {
-                            @Override
-                            public void onResponse(Call<SearchRequestModel> call, Response<SearchRequestModel> response) {
-                                mUsers.clear();
-                                mUsers.addAll(response.body().getUserList());
-                                mRecyclerView.getAdapter().notifyDataSetChanged();
-                            }
-                            @Override
-                            public void onFailure(Call<SearchRequestModel> call, Throwable t) {
-                                Toast.makeText(MainActivity.this, "An error occurred during networking", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        RequestSearchUsersByLogin(login);
                         dialog.dismiss();
                     }
                     else Toast.makeText(MainActivity.this, "It was necessary to enter login.", Toast.LENGTH_LONG).show();
                 }
             });
 
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() { // Кнопка Отмена
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
                 }
@@ -205,5 +191,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             dialog.show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void RequestSearchUsersByLogin(String login) {
+        App.getApi().searchUserByLogin(login).enqueue(new Callback<SearchRequestModel>() {
+            @Override
+            public void onResponse(Call<SearchRequestModel> call, Response<SearchRequestModel> response) {
+                mUsers.clear();
+                mUsers.addAll(response.body().getUserList());
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+            @Override
+            public void onFailure(Call<SearchRequestModel> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "An error occurred during networking", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

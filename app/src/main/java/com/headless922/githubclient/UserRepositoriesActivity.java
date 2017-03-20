@@ -38,8 +38,12 @@ public class UserRepositoriesActivity extends AppCompatActivity {
         App.getApi().getReposList(getIntent().getStringExtra("username")).enqueue(new Callback<ArrayList<RepoRequestModel>>() {
             @Override
             public void onResponse(Call<ArrayList<RepoRequestModel>> call, Response<ArrayList<RepoRequestModel>> response) {
-                mReposList.addAll(response.body());
-                mRecyclerView.getAdapter().notifyDataSetChanged();
+                if(!response.body().isEmpty()){
+                    mReposList.addAll(response.body());
+                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                }
+                else
+                    Toast.makeText(UserRepositoriesActivity.this, "There are no repositories.", Toast.LENGTH_SHORT).show();
             }
 
             @Override
