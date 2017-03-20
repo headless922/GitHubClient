@@ -7,8 +7,9 @@
     android:layout_height="match_parent"
     android:id="@+id/card_view_user"
     android:layout_margin="8dp"
-    res:cardCornerRadius="6dp"
-    res:cardElevation="10sp"
+    res:cardBackgroundColor="#f0f8ff"
+    res:cardCornerRadius="4dp"
+    res:cardElevation="6sp"
     res:contentPadding="16dp"
     res:contentPaddingTop="24dp"
     res:contentPaddingBottom="24dp">
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/image_view_user_avatar"
             android:adjustViewBounds="true"
-            />
+            android:contentDescription="Avatar"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -31,14 +32,14 @@
             android:layout_below="@+id/image_view_user_avatar"
             android:id="@+id/text_view_user_login"
             android:textSize="18sp"
-            android:text="User login: " />
+            android:text="@string/user_login" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/text_view_user_login"
             android:id="@+id/text_view_user_full_name"
-            android:text="User name: "
+            android:text="@string/user_name"
             android:textSize="18sp" />
 
         <TextView
@@ -46,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/text_view_user_full_name"
             android:id="@+id/text_view_user_company"
-            android:text="Company: "
+            android:text="@string/company"
             android:textSize="18sp" />
 
         <TextView
@@ -54,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/text_view_user_company"
             android:id="@+id/text_view_user_email"
-            android:text="e-mail: "
+            android:text="@string/e_mail"
             android:textSize="18sp" />
 
         <Button
@@ -62,7 +63,7 @@
             android:layout_height="50dp"
             android:id="@+id/button_show_user_repositories"
             android:elevation="6sp"
-            android:text="Show user repositories"
+            android:text="@string/show_user_repositories"
             android:textSize="14sp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"

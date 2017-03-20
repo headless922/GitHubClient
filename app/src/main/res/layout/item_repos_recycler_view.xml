@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/card_view_user"
     android:layout_margin="8dp"
+    res:cardBackgroundColor="#f0f8ff"
     res:cardCornerRadius="6dp"
     res:cardElevation="8sp"
     res:contentPadding="6dp"
@@ -21,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/text_view_repos_name"
-            android:text="Repo's name"
+            android:text="@string/repo_s_name"
             android:layout_margin="6dp"
             android:textSize="24sp"
             android:textColor="@android:color/background_dark"/>
@@ -30,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/text_view_repos_description"
-            android:text="Repo's description"
+            android:text="@string/repo_s_description"
             android:layout_margin="6dp"
             android:textSize="18sp"/>
 
@@ -39,7 +40,7 @@
             android:layout_height="50dp"
             android:id="@+id/button_show_repos_in_browser"
             android:layout_margin="6dp"
-            android:text="Open in browser"
+            android:text="@string/open_in_browser"
             android:onClick="onClickOpenRepoInBrowser"/>
 
     </LinearLayout>
