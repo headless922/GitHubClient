@@ -11,6 +11,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,9 +33,18 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView mRecyclerView;
+    private LinearLayoutManager mLayoutManager;
+    private UserInfoRecyclerViewAdapter mAdapter;
     private List<UserRequestModel> mUsers;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EditText editText;
+
+    private boolean loading;
+    private int firstVisibleItem;
+    private int visibleItemCount;
+    private int totalItemCount;
+    private int previousTotal = 0;
+    private int visibleThreshold = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +64,48 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mUsers = new ArrayList<>();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.users_recycler_view);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        UserInfoRecyclerViewAdapter adapter = new UserInfoRecyclerViewAdapter(this, mUsers);
-        mRecyclerView.setAdapter(adapter);
-        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-        mRecyclerView.setItemAnimator(itemAnimator);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new UserInfoRecyclerViewAdapter(this, mUsers);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                visibleItemCount = mRecyclerView.getChildCount();
+                totalItemCount = mLayoutManager.getItemCount();
+                firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+
+                if (loading) {
+                    if (totalItemCount > previousTotal) {
+                        loading = false;
+                        previousTotal = totalItemCount;
+                    }
+                }
+                if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+                    // End has been reached
+
+                    Log.i("page", "end reached");
+
+                    App.getApi().getUserListSince(mUsers.get(totalItemCount-1).getUserId()).enqueue(new Callback<List<UserRequestModel>>() {
+                        @Override
+                        public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
+                            mUsers.addAll(response.body());
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
+                            Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    loading = true;
+                }
+            }
+        });
 
         App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
             @Override
