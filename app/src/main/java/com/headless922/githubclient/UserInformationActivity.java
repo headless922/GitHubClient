@@ -41,29 +41,42 @@ public class UserInformationActivity extends AppCompatActivity {
         mTextViewCompany = (TextView) findViewById(R.id.text_view_user_company);
         mTextViewEmail = (TextView) findViewById(R.id.text_view_user_email);
 
-        App.getApi().getUserInfo(getIntent().getStringExtra("username")).enqueue(new Callback<UserRequestModel>() {
+        App.getApi().getUserInfo(getIntent().getStringExtra("username"))
+                .enqueue(new Callback<UserRequestModel>() {
             @Override
-            public void onResponse(Call<UserRequestModel> call, Response<UserRequestModel> response) {
-                mUserInfo = response.body();
-                Glide.with(UserInformationActivity.this)
-                        .load(mUserInfo.getAvatarUrl())
-                        .into(mImageView);
-                String bufString = mTextViewLogin.getText() + mUserInfo.getLogin();
-                mTextViewLogin.setText(bufString);
-                bufString = mTextViewName.getText() + mUserInfo.getName();
-                mTextViewName.setText(bufString);
-                if(mUserInfo.getCompany() != null) {
-                    bufString = mTextViewCompany.getText() + mUserInfo.getCompany();
-                    mTextViewCompany.setText(bufString);
-                }
-                else mTextViewCompany.setVisibility(View.GONE);
-                bufString = mTextViewEmail.getText() + mUserInfo.getEmail();
-                mTextViewEmail.setText(bufString);
+            public void onResponse(Call<UserRequestModel> call,
+                                   Response<UserRequestModel> response) {
+                if (response.code() == 200) {
+                    mUserInfo = response.body();
+                    Glide.with(UserInformationActivity.this)
+                            .load(mUserInfo.getAvatarUrl())
+                            .into(mImageView);
+                    String bufString = mTextViewLogin.getText() + mUserInfo.getLogin();
+                    mTextViewLogin.setText(bufString);
+                    bufString = mTextViewName.getText() + mUserInfo.getName();
+                    mTextViewName.setText(bufString);
+                    if (mUserInfo.getCompany() != null) {
+                        bufString = mTextViewCompany.getText() + mUserInfo.getCompany();
+                        mTextViewCompany.setText(bufString);
+                    } else {
+                        mTextViewCompany.setVisibility(View.GONE);
+                    }
+                    bufString = mTextViewEmail.getText() + mUserInfo.getEmail();
+                    mTextViewEmail.setText(bufString);
+                } else if (response.code() == 403) {
+                    Toast.makeText(UserInformationActivity.this,
+                            getString(R.string.request_limit),
+                            Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(UserInformationActivity.this,
+                        getString(R.string.something_wrong) + response.code(),
+                        Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<UserRequestModel> call, Throwable t) {
-                Toast.makeText(UserInformationActivity.this, "Error occured during networking.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserInformationActivity.this,
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }

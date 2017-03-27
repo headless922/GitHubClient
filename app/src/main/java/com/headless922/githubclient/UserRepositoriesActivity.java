@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.Toast;
 
 import com.headless922.githubclient.recyclerviews.ReposRecyclerViewAdapter;
@@ -39,25 +38,37 @@ public class UserRepositoriesActivity extends AppCompatActivity {
         ReposRecyclerViewAdapter adapter = new ReposRecyclerViewAdapter(this, mReposList);
         mRecyclerView.setAdapter(adapter);
 
-        App.getApi().getReposList(getIntent().getStringExtra("username")).enqueue(new Callback<ArrayList<RepoRequestModel>>() {
+        App.getApi().getReposList(getIntent().getStringExtra("username"))
+                .enqueue(new Callback<ArrayList<RepoRequestModel>>() {
             @Override
-            public void onResponse(Call<ArrayList<RepoRequestModel>> call, Response<ArrayList<RepoRequestModel>> response) {
-                if(!response.body().isEmpty()){
-                    mReposList.addAll(response.body());
-                    mRecyclerView.getAdapter().notifyDataSetChanged();
+            public void onResponse(Call<ArrayList<RepoRequestModel>> call,
+                                   Response<ArrayList<RepoRequestModel>> response) {
+                if (response.code() == 200) {
+                    if (!response.body().isEmpty()) {
+                        mReposList.addAll(response.body());
+                        mRecyclerView.getAdapter().notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(UserRepositoriesActivity.this,
+                                "There are no repositories.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else if (response.code() == 403) {
+                    Toast.makeText(UserRepositoriesActivity.this,
+                            getString(R.string.request_limit),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(UserRepositoriesActivity.this,
+                            getString(R.string.something_wrong),
+                            Toast.LENGTH_SHORT).show();
                 }
-                else
-                    Toast.makeText(UserRepositoriesActivity.this, "There are no repositories.", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<ArrayList<RepoRequestModel>> call, Throwable t) {
-                Toast.makeText(UserRepositoriesActivity.this, "The error occured during networking.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserRepositoriesActivity.this,
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    public void onClickOpenRepoInBrowser(View view) {
-        Toast.makeText(this, "asdasdasdasdasdasdasdasd", Toast.LENGTH_SHORT).show();
     }
 }

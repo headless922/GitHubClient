@@ -28,6 +28,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
+
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView mRecyclerView;
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mRecyclerView.setLayoutManager(mLayoutManager);
         UserInfoRecyclerViewAdapter mAdapter = new UserInfoRecyclerViewAdapter(this, mUsers);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, VERTICAL));
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -83,9 +85,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                     // End has been reached
                     int userId = mUsers.get(totalItemCount - 1).getUserId();
-                    App.getApi().getUserListSince(userId).enqueue(new Callback<List<UserRequestModel>>() {
+                    App.getApi().getUserListSince(userId)
+                            .enqueue(new Callback<List<UserRequestModel>>() {
                         @Override
-                        public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
+                        public void onResponse(Call<List<UserRequestModel>> call,
+                                               Response<List<UserRequestModel>> response) {
                             switch (response.code()) {
                                 case 200:
                                     mUsers.addAll(response.body());
@@ -166,7 +170,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
             @Override
             public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this,
+                        R.string.network_error,
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -188,7 +194,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         previousTotal = 0;
                         break;
                     case 403:
-                        Toast.makeText(MainActivity.this, getString(R.string.request_limit), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this,
+                                getString(R.string.request_limit),
+                                Toast.LENGTH_SHORT).show();
                         mSwipeRefreshLayout.setRefreshing(false);
                         break;
                     default:
@@ -203,7 +211,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
             @Override
             public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this,
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -231,8 +241,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     if (!"".equals(login)) {
                         requestSearchUsersByLogin(login);
                         dialog.dismiss();
-                    }
-                    else Toast.makeText(MainActivity.this, "It was necessary to enter login.", Toast.LENGTH_LONG).show();
+                    } else Toast.makeText(MainActivity.this,
+                            "It was necessary to enter login.",
+                            Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -252,7 +263,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void requestSearchUsersByLogin(String login) {
         App.getApi().searchUserByLogin(login).enqueue(new Callback<SearchRequestModel>() {
             @Override
-            public void onResponse(Call<SearchRequestModel> call, Response<SearchRequestModel> response) {
+            public void onResponse(Call<SearchRequestModel> call,
+                                   Response<SearchRequestModel> response) {
                 switch (response.code()) {
                     case 200:
                         if (response.body().getTotalCount() != 0) {
@@ -261,11 +273,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                             mRecyclerView.getAdapter().notifyDataSetChanged();
                             break;
                         } else {
-                            Toast.makeText(MainActivity.this, "No users found", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this,
+                                    "No users found",
+                                    Toast.LENGTH_SHORT).show();
                             break;
                         }
                     case 403:
-                        Toast.makeText(MainActivity.this, "Request's limit is out. (60 per hour)", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this,
+                                "Request's limit is out. (60 per hour)",
+                                Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         Toast.makeText(
@@ -277,7 +293,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
             @Override
             public void onFailure(Call<SearchRequestModel> call, Throwable t) {
-                Toast.makeText(MainActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this,
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
