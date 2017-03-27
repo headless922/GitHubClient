@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     String login = editText.getText().toString();
-                    if (!"".equals(login)) {
+                    if (!login.equals("")) {
                         requestSearchUsersByLogin(login);
                         dialog.dismiss();
                     } else Toast.makeText(MainActivity.this,
