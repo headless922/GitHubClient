@@ -10,8 +10,8 @@
         android:id="@+id/toolbar_main_activity"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/primary"
-        android:elevation="6sp"
+        android:background="@color/primary_dark"
+        android:elevation="2sp"
         android:titleTextColor="@color/primary_text" />
 
     <android.support.v4.widget.SwipeRefreshLayout

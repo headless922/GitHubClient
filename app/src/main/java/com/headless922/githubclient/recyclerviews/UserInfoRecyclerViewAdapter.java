@@ -1,6 +1,9 @@
 package com.headless922.githubclient.recyclerviews;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.headless922.githubclient.R;
 import com.headless922.githubclient.requestmodel.UserRequestModel;
 
@@ -37,11 +41,19 @@ public class UserInfoRecyclerViewAdapter extends RecyclerView.Adapter<UserInfoRe
     }
 
     @Override
-    public void onBindViewHolder(CustomViewHolder holder, int position) {
+    public void onBindViewHolder(final CustomViewHolder holder, int position) {
 
         Glide.with(mContext)
-             .load(mUsers.get(position).getAvatarUrl())
-             .into(holder.imageViewAvatar);
+                .load(mUsers.get(position).getAvatarUrl()).asBitmap().centerCrop()
+                .into(new BitmapImageViewTarget(holder.imageViewAvatar) {
+                    @Override
+                    protected void setResource(Bitmap resource) {
+                        RoundedBitmapDrawable roundedBitmapDrawable =
+                                RoundedBitmapDrawableFactory.create(mContext.getResources(), resource);
+                        roundedBitmapDrawable.setCircular(true);
+                        holder.imageViewAvatar.setImageDrawable(roundedBitmapDrawable);
+                    }
+                });
 
         holder.textViewUsername.setText(mUsers.get(position).getLogin());
     }

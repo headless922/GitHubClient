@@ -50,6 +50,7 @@ public class UserInformationActivity extends AppCompatActivity {
                     mUserInfo = response.body();
                     Glide.with(UserInformationActivity.this)
                             .load(mUserInfo.getAvatarUrl())
+                            .centerCrop()
                             .into(mImageView);
                     String bufString = mTextViewLogin.getText() + mUserInfo.getLogin();
                     mTextViewLogin.setText(bufString);

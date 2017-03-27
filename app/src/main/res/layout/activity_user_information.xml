@@ -9,8 +9,8 @@
         android:id="@+id/toolbar_user_activity"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/primary"
-        android:elevation="6sp"
+        android:background="@color/primary_dark"
+        android:elevation="2dp"
         android:titleTextColor="@color/primary_text">
 
     </android.support.v7.widget.Toolbar>
@@ -34,10 +34,9 @@
             <ImageView
                 android:id="@+id/image_view_user_avatar"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="325dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/ic_tag_faces_black_48dp"
                 android:contentDescription="@string/avatar"
                 android:paddingBottom="4sp"
                 android:scaleType="centerCrop" />
@@ -85,7 +84,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="14dp"
                 android:elevation="2sp"
                 android:onClick="onClickShowUserInformationButton"
                 android:text="@string/show_user_repositories"
