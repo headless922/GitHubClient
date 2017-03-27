@@ -2,16 +2,14 @@ package com.headless922.githubclient;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
-    private UserInfoRecyclerViewAdapter mAdapter;
     private List<UserRequestModel> mUsers;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EditText editText;
@@ -66,8 +63,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mRecyclerView = (RecyclerView) findViewById(R.id.users_recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new UserInfoRecyclerViewAdapter(this, mUsers);
+        UserInfoRecyclerViewAdapter mAdapter = new UserInfoRecyclerViewAdapter(this, mUsers);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -78,26 +76,45 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 totalItemCount = mLayoutManager.getItemCount();
                 firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
 
-                if (loading) {
-                    if (totalItemCount > previousTotal) {
-                        loading = false;
-                        previousTotal = totalItemCount;
-                    }
+                if (loading && (totalItemCount > previousTotal)) {
+                    loading = false;
+                    previousTotal = totalItemCount;
                 }
                 if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                     // End has been reached
-                    App.getApi().getUserListSince(mUsers.get(totalItemCount-1).getUserId()).enqueue(new Callback<List<UserRequestModel>>() {
+                    int userId = mUsers.get(totalItemCount - 1).getUserId();
+                    App.getApi().getUserListSince(userId).enqueue(new Callback<List<UserRequestModel>>() {
                         @Override
                         public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
-                            mUsers.addAll(response.body());
-                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                            switch (response.code()) {
+                                case 200:
+                                    mUsers.addAll(response.body());
+                                    mRecyclerView.getAdapter()
+                                            .notifyItemRangeInserted(totalItemCount - 1, 30);
+                                    loading = true;
+                                    break;
+                                case 403:
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            R.string.request_limit,
+                                            Toast.LENGTH_SHORT).show();
+                                    break;
+                                default:
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            getString(R.string.something_wrong) + response.code(),
+                                            Toast.LENGTH_SHORT).show();
+                                    break;
+                            }
                         }
                         @Override
                         public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
-                            Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    getString(R.string.network_error),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
-                    loading = true;
                 }
             }
         });
@@ -111,8 +128,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         new RecyclerItemClickListener.OnItemClickListener() {
                             @Override
                             public void onItemClick(View view, int position) {
-                                view.setBackgroundColor(Color.parseColor("#f0f8ff"));
-                                Intent intent = new Intent(MainActivity.this, UserInformationActivity.class);
+                                Intent intent = new Intent(MainActivity.this,
+                                        UserInformationActivity.class);
                                 intent.putExtra("username",mUsers.get(position).getLogin());
                                 startActivity(intent);
                             }
@@ -122,9 +139,29 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void requestUserList() {
         App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
             @Override
-            public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
-                mUsers.addAll(response.body());
-                mRecyclerView.getAdapter().notifyDataSetChanged();
+            public void onResponse(Call<List<UserRequestModel>> call,
+                                   Response<List<UserRequestModel>> response) {
+                switch (response.code()) {
+                    case 200:
+                        if (!mUsers.isEmpty()) {
+                            mUsers.clear();
+                        }
+                        mUsers.addAll(response.body());
+                        mRecyclerView.getAdapter().notifyDataSetChanged();
+                        break;
+                    case 403:
+                        Toast.makeText(
+                                MainActivity.this,
+                                getString(R.string.request_limit),
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(
+                                MainActivity.this,
+                                getString(R.string.something_wrong) + response.code(),
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
             }
 
             @Override
@@ -138,16 +175,35 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public void onRefresh() {
         App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
             @Override
-            public void onResponse(Call<List<UserRequestModel>> call, Response<List<UserRequestModel>> response) {
-                mUsers.clear();
-                mUsers.addAll(response.body());
-                mRecyclerView.getAdapter().notifyDataSetChanged();
-                mSwipeRefreshLayout.setRefreshing(false);
+            public void onResponse(Call<List<UserRequestModel>> call,
+                                   Response<List<UserRequestModel>> response) {
+                switch (response.code()) {
+                    case 200:
+                        if (!mUsers.isEmpty()) {
+                            mUsers.clear();
+                        }
+                        mUsers.addAll(response.body());
+                        mRecyclerView.getAdapter().notifyDataSetChanged();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        previousTotal = 0;
+                        break;
+                    case 403:
+                        Toast.makeText(MainActivity.this, getString(R.string.request_limit), Toast.LENGTH_SHORT).show();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        break;
+                    default:
+                        Toast.makeText(
+                                MainActivity.this,
+                                getString(R.string.something_wrong) + response.code(),
+                                Toast.LENGTH_SHORT).show();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        break;
+                }
             }
 
             @Override
             public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "An error occurred during networking", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -173,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 public void onClick(DialogInterface dialog, int whichButton) {
                     String login = editText.getText().toString();
                     if (!"".equals(login)) {
-                        RequestSearchUsersByLogin(login);
+                        requestSearchUsersByLogin(login);
                         dialog.dismiss();
                     }
                     else Toast.makeText(MainActivity.this, "It was necessary to enter login.", Toast.LENGTH_LONG).show();
@@ -193,17 +249,35 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         return super.onOptionsItemSelected(item);
     }
 
-    private void RequestSearchUsersByLogin(String login) {
+    private void requestSearchUsersByLogin(String login) {
         App.getApi().searchUserByLogin(login).enqueue(new Callback<SearchRequestModel>() {
             @Override
             public void onResponse(Call<SearchRequestModel> call, Response<SearchRequestModel> response) {
-                mUsers.clear();
-                mUsers.addAll(response.body().getUserList());
-                mRecyclerView.getAdapter().notifyDataSetChanged();
+                switch (response.code()) {
+                    case 200:
+                        if (response.body().getTotalCount() != 0) {
+                            mUsers.clear();
+                            mUsers.addAll(response.body().getUserList());
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                            break;
+                        } else {
+                            Toast.makeText(MainActivity.this, "No users found", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                    case 403:
+                        Toast.makeText(MainActivity.this, "Request's limit is out. (60 per hour)", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(
+                                MainActivity.this,
+                                getString(R.string.something_wrong) + response.code(),
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
             }
             @Override
             public void onFailure(Call<SearchRequestModel> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "An error occurred during networking", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
             }
         });
     }

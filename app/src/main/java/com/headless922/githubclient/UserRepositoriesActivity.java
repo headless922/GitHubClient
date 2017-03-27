@@ -1,15 +1,15 @@
 package com.headless922.githubclient;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
 import com.headless922.githubclient.recyclerviews.ReposRecyclerViewAdapter;
 import com.headless922.githubclient.requestmodel.RepoRequestModel;
-
 
 import java.util.ArrayList;
 
@@ -26,6 +26,10 @@ public class UserRepositoriesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_repositories);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_user_repositories);
+        toolbar.setTitle(getIntent().getStringExtra("username") + "'s repositories");
+        setSupportActionBar(toolbar);
 
         mReposList = new ArrayList<>();
 

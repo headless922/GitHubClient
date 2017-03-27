@@ -7,25 +7,26 @@
     tools:context="com.headless922.githubclient.MainActivity">
 
     <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_main_activity"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:id="@+id/toolbar_main_activity"
-        android:background="#f0f8ff"/>
+        android:background="@color/primary"
+        android:elevation="6sp"
+        android:titleTextColor="@color/primary_text" />
 
     <android.support.v4.widget.SwipeRefreshLayout
-
+        android:id="@+id/swipe_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/swipe_container"
         android:layout_below="@+id/toolbar_main_activity">
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/users_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:id="@+id/users_recycler_view"
-            android:layout_alignParentStart="true">
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true">
         </android.support.v7.widget.RecyclerView>
 
     </android.support.v4.widget.SwipeRefreshLayout>

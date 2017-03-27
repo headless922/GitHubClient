@@ -5,12 +5,15 @@
     <string name="enter_the_user_s_login_here">Enter the user\'s login here</string>
     <string name="network_error">An error occurred during networking</string>
     <string name="username">Username</string>
-    <string name="user_login">User login:</string>
-    <string name="user_name">User name:</string>
-    <string name="company">Company:</string>
+    <string name="user_login">User login: </string>
+    <string name="user_name">User name: </string>
+    <string name="company">Company: </string>
     <string name="show_user_repositories">Show user repositories</string>
-    <string name="e_mail">e-mail:</string>
+    <string name="e_mail">e-mail: </string>
     <string name="repo_s_name">Repo\'s name</string>
     <string name="repo_s_description">Repo\'s description</string>
     <string name="open_in_browser">Open in browser</string>
+    <string name="avatar">Avatar</string>
+    <string name="request_limit">Request\'s limit is out. (60 per hour)</string>
+    <string name="something_wrong">Something was going wrong. Request HTTP code:</string>
 </resources>

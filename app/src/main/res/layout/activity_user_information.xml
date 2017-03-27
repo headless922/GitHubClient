@@ -1,75 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:res="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/card_view_user"
-    android:layout_margin="8dp"
-    res:cardBackgroundColor="#f0f8ff"
-    res:cardCornerRadius="4dp"
-    res:cardElevation="6sp"
-    res:contentPadding="16dp"
-    res:contentPaddingTop="24dp"
-    res:contentPaddingBottom="24dp">
+    android:layout_height="wrap_content">
 
-    <RelativeLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_user_activity"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.headless922.githubclient.UserInformationActivity">
+        android:layout_height="50dp"
+        android:background="@color/primary"
+        android:elevation="6sp"
+        android:titleTextColor="@color/primary_text">
 
-        <ImageView
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar_user_activity"
+        android:layout_margin="4dp"
+        android:background="@color/cardview_dark_background"
+        res:cardBackgroundColor="@color/cardview_light_background"
+        res:cardCornerRadius="@dimen/cardview_default_radius"
+        res:cardElevation="@dimen/cardview_default_elevation">
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/image_view_user_avatar"
-            android:adjustViewBounds="true"
-            android:contentDescription="Avatar"/>
+            android:layout_height="match_parent"
+            tools:context="com.headless922.githubclient.UserInformationActivity">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/image_view_user_avatar"
-            android:id="@+id/text_view_user_login"
-            android:textSize="18sp"
-            android:text="@string/user_login" />
+            <ImageView
+                android:id="@+id/image_view_user_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/ic_tag_faces_black_48dp"
+                android:contentDescription="@string/avatar"
+                android:paddingBottom="4sp"
+                android:scaleType="centerCrop" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/text_view_user_login"
-            android:id="@+id/text_view_user_full_name"
-            android:text="@string/user_name"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/text_view_user_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/image_view_user_avatar"
+                android:layout_margin="4dp"
+                android:text="@string/user_login"
+                android:textSize="18sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/text_view_user_full_name"
-            android:id="@+id/text_view_user_company"
-            android:text="@string/company"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/text_view_user_full_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_user_login"
+                android:layout_margin="4dp"
+                android:text="@string/user_name"
+                android:textSize="18sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/text_view_user_company"
-            android:id="@+id/text_view_user_email"
-            android:text="@string/e_mail"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/text_view_user_company"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_user_full_name"
+                android:layout_margin="4dp"
+                android:text="@string/company"
+                android:textSize="18sp" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/button_show_user_repositories"
-            android:elevation="6sp"
-            android:text="@string/show_user_repositories"
-            android:textSize="14sp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="6dp"
-            android:onClick="onClickShowUserInformationButton"/>
+            <TextView
+                android:id="@+id/text_view_user_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_user_company"
+                android:layout_margin="4dp"
+                android:text="@string/e_mail"
+                android:textSize="18sp" />
 
-    </RelativeLayout>
-</android.support.v7.widget.CardView>
+            <Button
+                android:id="@+id/button_show_user_repositories"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="8dp"
+                android:elevation="2sp"
+                android:onClick="onClickShowUserInformationButton"
+                android:text="@string/show_user_repositories"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
