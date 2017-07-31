@@ -18,10 +18,6 @@ import com.headless922.githubclient.requestmodel.UserRequestModel;
 
 import java.util.List;
 
-/**
- * Created by Headless922 on 17.03.2017.
- */
-
 public class UserInfoRecyclerViewAdapter extends RecyclerView.Adapter<UserInfoRecyclerViewAdapter.CustomViewHolder>{
 
     private Context mContext;

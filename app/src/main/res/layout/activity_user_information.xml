@@ -29,7 +29,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.headless922.githubclient.UserInformationActivity">
+            tools:context="com.headless922.githubclient.activity.UserInformationActivity">
 
             <ImageView
                 android:id="@+id/image_view_user_avatar"

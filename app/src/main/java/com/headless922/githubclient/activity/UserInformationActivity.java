@@ -1,4 +1,4 @@
-package com.headless922.githubclient;
+package com.headless922.githubclient.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.headless922.githubclient.R;
+import com.headless922.githubclient.app.App;
 import com.headless922.githubclient.requestmodel.UserRequestModel;
 
 import retrofit2.Call;

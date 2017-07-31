@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">GitHubClient</string>
     <string name="search_menu_item">Search by login</string>
-    <string name="enter_the_user_s_login">Enter the user\'s login:</string>
     <string name="enter_the_user_s_login_here">Enter the user\'s login here</string>
     <string name="network_error">An error occurred during networking</string>
     <string name="username">Username</string>
@@ -16,4 +15,5 @@
     <string name="avatar">Avatar</string>
     <string name="request_limit">Request\'s limit is out. (60 per hour)</string>
     <string name="something_wrong">Something was going wrong. Request HTTP code:</string>
+    <string name="search_results">Search results</string>
 </resources>

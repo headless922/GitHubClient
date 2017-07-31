@@ -1,4 +1,4 @@
-package com.headless922.githubclient;
+package com.headless922.githubclient.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,12 +10,16 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.headless922.githubclient.R;
+import com.headless922.githubclient.app.App;
 import com.headless922.githubclient.recyclerviews.RecyclerItemClickListener;
 import com.headless922.githubclient.recyclerviews.UserInfoRecyclerViewAdapter;
 import com.headless922.githubclient.requestmodel.SearchRequestModel;
@@ -32,25 +36,30 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
+    private static boolean IS_SEARCH_RESULTS_SHOW = false;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     private List<UserRequestModel> mUsers;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EditText editText;
-
+    private Toolbar toolbar;
     private boolean loading;
     private int firstVisibleItem;
     private int visibleItemCount;
     private int totalItemCount;
     private int previousTotal = 0;
-    private int visibleThreshold = 4;
+    private int visibleThreshold = 10;
+    private String searchingLogin;
+    private int searchingUsersCount;
+    private int searchingPage = 1;
+    private int curentCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_main_activity);
         setSupportActionBar(toolbar);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
@@ -73,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
                 visibleItemCount = mRecyclerView.getChildCount();
                 totalItemCount = mLayoutManager.getItemCount();
                 firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
@@ -84,41 +92,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 }
                 if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                     // End has been reached
-                    int userId = mUsers.get(totalItemCount - 1).getUserId();
-                    App.getApi().getUserListSince(userId)
-                            .enqueue(new Callback<List<UserRequestModel>>() {
-                        @Override
-                        public void onResponse(Call<List<UserRequestModel>> call,
-                                               Response<List<UserRequestModel>> response) {
-                            switch (response.code()) {
-                                case 200:
-                                    mUsers.addAll(response.body());
-                                    mRecyclerView.getAdapter()
-                                            .notifyItemRangeInserted(totalItemCount - 1, 30);
-                                    loading = true;
-                                    break;
-                                case 403:
-                                    Toast.makeText(
-                                            MainActivity.this,
-                                            R.string.request_limit,
-                                            Toast.LENGTH_SHORT).show();
-                                    break;
-                                default:
-                                    Toast.makeText(
-                                            MainActivity.this,
-                                            getString(R.string.something_wrong) + response.code(),
-                                            Toast.LENGTH_SHORT).show();
-                                    break;
-                            }
+                    if (IS_SEARCH_RESULTS_SHOW == false) {
+                        int userId = mUsers.get(totalItemCount - 1).getUserId();
+                        getUserListSinceCurentUser(userId);
+                    } else {
+                        curentCount += 100;
+                        searchingPage += 1;
+                        if (curentCount < searchingUsersCount) {
+                            requestSearchUsersByLogin(searchingLogin, searchingPage);
+                        } else {
+                            curentCount = 0;
+                            searchingPage = 1;
                         }
-                        @Override
-                        public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
-                            Toast.makeText(
-                                    MainActivity.this,
-                                    getString(R.string.network_error),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    }
                 }
             }
         });
@@ -140,6 +126,54 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         }));
     }
 
+    @Override
+    public void onBackPressed() {
+        if (IS_SEARCH_RESULTS_SHOW == false) {
+            super.onBackPressed();
+        } else {
+            requestUserList();
+            toolbar.setTitle(R.string.app_name);
+        }
+    }
+
+    private void getUserListSinceCurentUser(int userId) {
+        App.getApi().getUserListSince(userId)
+                .enqueue(new Callback<List<UserRequestModel>>() {
+                    @Override
+                    public void onResponse(Call<List<UserRequestModel>> call,
+                                           Response<List<UserRequestModel>> response) {
+                        switch (response.code()) {
+                            case 200:
+                                mUsers.addAll(response.body());
+                                mRecyclerView.getAdapter()
+                                        .notifyItemRangeInserted(totalItemCount - 1, 30);
+                                loading = true;
+                                break;
+                            case 403:
+                                Toast.makeText(
+                                        MainActivity.this,
+                                        R.string.request_limit,
+                                        Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                Toast.makeText(
+                                        MainActivity.this,
+                                        getString(R.string.something_wrong) + response.code(),
+                                        Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<UserRequestModel>> call, Throwable t) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                getString(R.string.network_error),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void requestUserList() {
         App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
             @Override
@@ -152,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         }
                         mUsers.addAll(response.body());
                         mRecyclerView.getAdapter().notifyDataSetChanged();
+                        IS_SEARCH_RESULTS_SHOW = false;
                         break;
                     case 403:
                         Toast.makeText(
@@ -179,6 +214,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
+        if (IS_SEARCH_RESULTS_SHOW == false) {
+            getListOfUsers();
+        } else {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    private void getListOfUsers() {
         App.getApi().getUserList().enqueue(new Callback<List<UserRequestModel>>() {
             @Override
             public void onResponse(Call<List<UserRequestModel>> call,
@@ -229,20 +272,41 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.toolbar_item_search) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             View view = this.getLayoutInflater().inflate(R.layout.search_dialog, null);
             builder.setView(view);
             builder.setTitle("Search users by login");
             editText = (EditText) view.findViewById(R.id.edit_text_search_dialog);
 
+            builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                @Override
+                public boolean onKey(DialogInterface dialog, int i, KeyEvent keyEvent) {
+                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                            searchingLogin = editText.getText().toString();
+                            if (!searchingLogin.equals("")) {
+                                requestSearchUsersByLogin(searchingLogin, 1);
+                                dialog.dismiss();
+                                toolbar.setTitle(R.string.search_results);
+                            } else Toast.makeText(MainActivity.this,
+                                    "It was necessary to enter searchingLogin.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    String login = editText.getText().toString();
-                    if (!login.equals("")) {
-                        requestSearchUsersByLogin(login);
+                    searchingLogin = editText.getText().toString();
+                    if (!searchingLogin.equals("")) {
+                        requestSearchUsersByLogin(searchingLogin, 1);
                         dialog.dismiss();
+                        toolbar.setTitle(R.string.search_results);
                     } else Toast.makeText(MainActivity.this,
-                            "It was necessary to enter login.",
+                            "It was necessary to enter searchingLogin.",
                             Toast.LENGTH_LONG).show();
                 }
             });
@@ -254,23 +318,45 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
 
             builder.setCancelable(true);
-            AlertDialog dialog = builder.create();
+            final AlertDialog dialog = builder.create();
             dialog.show();
+
+            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                            searchingLogin = editText.getText().toString();
+                            if (!searchingLogin.equals("")) {
+                                requestSearchUsersByLogin(searchingLogin, 1);
+                                toolbar.setTitle(R.string.search_results);
+                                dialog.dismiss();
+                            } else Toast.makeText(MainActivity.this,
+                                    "It was necessary to enter the user's login",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    return false;
+                }
+            });
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void requestSearchUsersByLogin(String login) {
-        App.getApi().searchUserByLogin(login).enqueue(new Callback<SearchRequestModel>() {
+    private void requestSearchUsersByLogin(String login, int page) {
+        App.getApi().searchUserByLogin(login, page, 100).enqueue(new Callback<SearchRequestModel>() {
             @Override
             public void onResponse(Call<SearchRequestModel> call,
                                    Response<SearchRequestModel> response) {
                 switch (response.code()) {
                     case 200:
                         if (response.body().getTotalCount() != 0) {
+                            searchingUsersCount = response.body().getTotalCount();
                             mUsers.clear();
                             mUsers.addAll(response.body().getUserList());
                             mRecyclerView.getAdapter().notifyDataSetChanged();
+                            IS_SEARCH_RESULTS_SHOW = true;
+                            previousTotal = 0;
                             break;
                         } else {
                             Toast.makeText(MainActivity.this,

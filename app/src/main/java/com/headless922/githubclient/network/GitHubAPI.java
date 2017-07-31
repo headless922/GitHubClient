@@ -18,7 +18,9 @@ public interface GitHubAPI {
     Call<List<UserRequestModel>> getUserList();
 
     @GET("/search/users")
-    Call<SearchRequestModel> searchUserByLogin(@Query("q") String userLogin);
+    Call<SearchRequestModel> searchUserByLogin(@Query("q") String userLogin,
+                                               @Query("page") int pageNumber,
+                                               @Query("per_page") int countOfUsersPerPage);
 
     @GET("/users")
     Call<List<UserRequestModel>> getUserListSince(@Query("since") int userId);

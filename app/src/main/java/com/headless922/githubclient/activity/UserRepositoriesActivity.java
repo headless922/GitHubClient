@@ -1,4 +1,4 @@
-package com.headless922.githubclient;
+package com.headless922.githubclient.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
+import com.headless922.githubclient.R;
+import com.headless922.githubclient.app.App;
 import com.headless922.githubclient.recyclerviews.ReposRecyclerViewAdapter;
 import com.headless922.githubclient.requestmodel.RepoRequestModel;
 
